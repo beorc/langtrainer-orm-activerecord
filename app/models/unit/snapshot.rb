@@ -1,7 +1,5 @@
 class Unit::Snapshot < ActiveRecord::Base
   belongs_to :unit_advance
-  has_one :unit, through: :unit_advance
-  has_many :boxes, through: :unit_advance
   validates :unit_advance, :date, presence: true
   validates :date, uniqueness: { scope: :unit_advance_id }
 
@@ -11,7 +9,7 @@ class Unit::Snapshot < ActiveRecord::Base
   scope :with_language, ->(language) { joins(:unit_advances).where('unit_advances.language_id = ?', language.id) }
 
   def self.table_name_prefix
-    'unit_'
+    'unit_advance'
   end
 
   def self.with_period(period)
@@ -27,9 +25,5 @@ class Unit::Snapshot < ActiveRecord::Base
     when Period::OneYear
       where('date >= ?', 1.year.ago)
     end
-  end
-
-  def self.boxes
-    includes(:boxes)
   end
 end

@@ -6,13 +6,12 @@ class Unit::Advance < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :unit
-  has_many :boxes, dependent: :destroy
   has_many :snapshots, class_name: 'Unit::Snapshot', dependent: :destroy
 
   serialize :steps, Array
 
   before_validation :ensure_steps
-  after_create :create_boxes
+  after_create :init_boxes
 
   def self.languages
     pluck(:language_id).uniq.map { |id| Language.find(id) }
@@ -132,13 +131,7 @@ class Unit::Advance < ActiveRecord::Base
     self.steps = step_mappings.map(&:step).map(&:id)
   end
 
-  def create_boxes
-    boxes.destroy_all
-    counter = 0
-    Langtrainer2.config.boxes_number.times do
-      boxes.create! number: counter
-      counter += 1
-    end
+  def init_boxes
     boxes.first.steps = Step.find(steps)
   end
 end
