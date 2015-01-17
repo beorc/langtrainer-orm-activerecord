@@ -4,7 +4,7 @@ class Step < ActiveRecord::Base
   has_many :steps_units, dependent: :destroy
 
   def template(language_slug)
-    template = send("#{language_slug}_template") || shared_template
+    template = send("#{language_slug}_template")
     return template.present? ? template : send(language_slug)
   end
 
