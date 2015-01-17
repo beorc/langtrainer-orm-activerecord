@@ -1,0 +1,14 @@
+first:
+  id: 1
+  user_id: 1
+  unit_id: 1
+  language_id: <%= Language.english.id %>
+  native_language_id: <%= Language.russian.id %>
+
+revised:
+  id: 2
+  user_id: 1
+  unit_id: 1
+  language_id: <%= Language.russian.id %>
+  native_language_id: <%= Language.english.id %>
+  revised: true

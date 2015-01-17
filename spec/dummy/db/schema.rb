@@ -11,29 +11,98 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150113195528) do
+ActiveRecord::Schema.define(version: 20150113220516) do
 
   create_table "courses", force: :cascade do |t|
     t.string   "slug",                       null: false
     t.boolean  "published",  default: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
   end
 
   add_index "courses", ["published"], name: "index_courses_on_published"
   add_index "courses", ["slug"], name: "index_courses_on_slug", unique: true
 
+  create_table "steps", force: :cascade do |t|
+    t.string "en"
+    t.string "en_regexp"
+    t.string "ru"
+    t.string "ru_regexp"
+    t.string "ru_template"
+    t.string "en_template"
+  end
+
+  create_table "steps_units", force: :cascade do |t|
+    t.integer "unit_id"
+    t.integer "step_id"
+    t.integer "position"
+    t.boolean "from_en",  default: true
+    t.boolean "to_en",    default: true
+    t.boolean "from_ru",  default: true
+    t.boolean "to_ru",    default: true
+  end
+
+  add_index "steps_units", ["position"], name: "index_steps_units_on_position"
+  add_index "steps_units", ["step_id", "unit_id"], name: "index_steps_units_on_step_id_and_unit_id", unique: true
+  add_index "steps_units", ["step_id"], name: "index_steps_units_on_step_id"
+
+  create_table "unit_advance_snapshots", force: :cascade do |t|
+    t.integer  "unit_advance_id"
+    t.text     "snapshot",        null: false
+    t.datetime "date",            null: false
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "unit_advance_snapshots", ["date"], name: "index_unit_advance_snapshots_on_date"
+  add_index "unit_advance_snapshots", ["unit_advance_id", "date"], name: "index_unit_advance_snapshots_on_unit_advance_id_and_date"
+
+  create_table "unit_advances", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "unit_id"
+    t.integer  "language_id",                          null: false
+    t.integer  "native_language_id",                   null: false
+    t.integer  "steps_passed",         default: 0
+    t.integer  "words_helped",         default: 0
+    t.integer  "steps_helped",         default: 0
+    t.integer  "right_answers",        default: 0
+    t.integer  "wrong_answers",        default: 0
+    t.text     "steps"
+    t.text     "box_0"
+    t.text     "box_1"
+    t.text     "box_2"
+    t.text     "box_3"
+    t.text     "box_4"
+    t.integer  "current_step",         default: 0
+    t.boolean  "revised",              default: false
+    t.integer  "revised_steps_number", default: 0
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
+
+  add_index "unit_advances", ["unit_id", "user_id", "language_id", "native_language_id"], name: "unit_advance_uniqueness", unique: true
+  add_index "unit_advances", ["unit_id"], name: "index_unit_advances_on_unit_id"
+  add_index "unit_advances", ["user_id"], name: "index_unit_advances_on_user_id"
+
   create_table "units", force: :cascade do |t|
-    t.integer  "course_id",                          null: false
+    t.integer  "course_id"
     t.string   "slug",                               null: false
-    t.boolean  "published",                          null: false
+    t.boolean  "published",          default: false
     t.boolean  "random_steps_order", default: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
   end
 
   add_index "units", ["course_id"], name: "index_units_on_course_id"
   add_index "units", ["published"], name: "index_units_on_published"
   add_index "units", ["slug"], name: "index_units_on_slug", unique: true
+
+  create_table "users", force: :cascade do |t|
+    t.string   "token",      null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "users", ["token"], name: "index_users_on_token", unique: true
 
 end

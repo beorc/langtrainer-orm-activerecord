@@ -4,7 +4,7 @@ class CreateCourses < ActiveRecord::Migration
       t.string :slug, null: false
       t.boolean :published, default: false
 
-      t.timestamps
+      t.timestamps null: false
 
       t.index :slug, unique: true
       t.index :published

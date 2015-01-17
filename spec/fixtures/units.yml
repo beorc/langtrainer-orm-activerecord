@@ -1,0 +1,5 @@
+first:
+  id: 1
+  course_id: 1
+  slug: 'first'
+  published: true

@@ -1,8 +1,8 @@
-class Unit::Snapshot < ActiveRecord::Base
-  belongs_to :unit_advance
-  has_one :user, thorugh: :unit_advance
-  has_one :unit, thorugh: :unit_advance
-  has_one :course, thorugh: :unit
+class Unit::AdvanceSnapshot < ActiveRecord::Base
+  belongs_to :unit_advance, class_name: 'Unit::Advance'
+  has_one :user, through: :unit_advance
+  has_one :unit, through: :unit_advance
+  has_one :course, through: :unit
 
   validates :unit_advance, :date, :snapshot, presence: true
   validates :date, uniqueness: { scope: :unit_advance_id }

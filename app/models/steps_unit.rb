@@ -1,4 +1,4 @@
-class StepsUnits < ActiveRecord::Base
+class StepsUnit < ActiveRecord::Base
   validates :unit, :step, presence: true
   validates :step_id, uniqueness: { scope: :unit_id }
 
@@ -9,11 +9,11 @@ class StepsUnits < ActiveRecord::Base
   scope :ordered, -> { order(:position) }
 
   def self.from_language(language)
-    where("from_#{language}" => true)
+    where("from_#{language.slug}" => true)
   end
 
   def self.to_language(language)
-    where("to_#{language}" => true)
+    where("to_#{language.slug}" => true)
   end
 
   def self.shuffled

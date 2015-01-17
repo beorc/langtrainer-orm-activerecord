@@ -1,0 +1,4 @@
+test:
+  id: 1
+  slug: 'test'
+  published: true

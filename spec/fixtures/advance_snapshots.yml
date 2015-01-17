@@ -1,0 +1,11 @@
+test:
+  id: 1
+  unit_advance_id: 1
+  date: <%= DateTime.current %>
+  snapshot: {
+    steps_passed: 1,
+    words_helped: 2,
+    steps_helped: 3,
+    right_answers: 4,
+    wrong_answers: 5
+  }

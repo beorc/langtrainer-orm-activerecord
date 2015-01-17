@@ -1,8 +1,8 @@
 class CreateUnitAdvances < ActiveRecord::Migration
   def change
     create_table :unit_advances do |t|
-      t.references :user, index: true, null: false
-      t.references :unit, index: true, null: false
+      t.references :user, index: true
+      t.references :unit, index: true
       t.integer :language_id, null: false
       t.integer :native_language_id, null: false
       t.integer :steps_passed, default: 0
@@ -20,9 +20,9 @@ class CreateUnitAdvances < ActiveRecord::Migration
       t.boolean :revised, default: false
       t.integer :revised_steps_number, default: 0
 
-      t.timestamps
+      t.timestamps null: false
 
-      t.index [:date, :user_id, :unit_id, :language_id], name: 'date_uniqueness', unique: true
+      t.index [:unit_id, :user_id, :language_id, :native_language_id], unique: true, name: :unit_advance_uniqueness
     end
     add_foreign_key :unit_advances, :users
     add_foreign_key :unit_advances, :units

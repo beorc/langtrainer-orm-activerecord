@@ -1,0 +1,12 @@
+first:
+  id: 1
+  en: 'first'
+  ru: 'первый'
+second:
+  id: 2
+  en: 'second'
+  ru: 'второй'
+third:
+  id: 3
+  en: 'third'
+  ru: 'третий'

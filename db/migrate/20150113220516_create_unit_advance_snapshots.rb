@@ -1,11 +1,11 @@
 class CreateUnitAdvanceSnapshots < ActiveRecord::Migration
   def change
     create_table :unit_advance_snapshots do |t|
-      t.references :unit_advance, index: false, null: false
+      t.references :unit_advance, index: false
       t.text :snapshot, null: false
       t.datetime :date, null: false
 
-      t.timestamps
+      t.timestamps null: false
 
       t.index [:unit_advance_id, :date]
       t.index :date

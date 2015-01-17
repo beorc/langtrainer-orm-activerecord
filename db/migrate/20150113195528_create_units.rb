@@ -1,13 +1,13 @@
 class CreateUnits < ActiveRecord::Migration
   def change
     create_table :units do |t|
-      t.references :course, index: true, null: false
+      t.references :course, index: true
       t.string :slug, null: false
-      t.boolean :published, null: false
+      t.boolean :published, default: false
 
       t.boolean :random_steps_order, default: false
 
-      t.timestamps
+      t.timestamps null: false
 
       t.index :slug, unique: true
       t.index :published

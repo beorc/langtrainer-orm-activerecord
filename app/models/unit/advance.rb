@@ -1,12 +1,12 @@
 class Unit::Advance < ActiveRecord::Base
   BOXES_NUMBER = 5
   BOXES_PROBABILITIES = [60, 25, 10, 8, 2]
-  validates :user, :steps, :language_id, :native_language_id, presence: true
-  validates :date, uniqueness: { scope: [:user_id, :unit_id, :language_id] }
+  validates :user, :unit, :language_id, :native_language_id, presence: true
+  validates :unit, uniqueness: { scope: [:user_id, :language_id, :native_language_id] }
 
   belongs_to :user
   belongs_to :unit
-  has_many :snapshots, class_name: 'Unit::Snapshot', dependent: :destroy
+  has_many :snapshots, class_name: 'Unit::AdvanceSnapshot', foreign_key: :unit_advance_id, dependent: :destroy
 
   serialize :steps, Array
 
@@ -14,8 +14,8 @@ class Unit::Advance < ActiveRecord::Base
     serialize "box_#{i}".to_sym, Array
   end
 
-  before_validation :ensure_steps, on: :create
-  before_validation :init_boxes, on: :create
+  before_create :ensure_steps
+  before_create :init_boxes
 
   def language
     Language.find(language_id)
@@ -26,28 +26,23 @@ class Unit::Advance < ActiveRecord::Base
   end
 
   def step_passed!
-    self.steps_passed += 1
-    save!
+    increment!(:steps_passed)
   end
 
   def word_helped!
-    self.words_helped += 1
-    save!
+    increment!(:words_helped)
   end
 
   def step_helped!
-    self.steps_helped += 1
-    save!
+    increment!(:steps_helped)
   end
 
   def right_answer!
-    self.right_answers += 1
-    save!
+    increment!(:right_answers)
   end
 
   def wrong_answer!
-    self.wrong_answers += 1
-    save!
+    increment!(:wrong_answers)
   end
 
   def revised!
@@ -55,7 +50,7 @@ class Unit::Advance < ActiveRecord::Base
   end
 
   def step_revised!
-    update_attribute(:revised_steps_number, revised_steps_number + 1)
+    increment!(:revised_steps_number)
   end
 
   def advance!
@@ -71,10 +66,10 @@ class Unit::Advance < ActiveRecord::Base
   end
 
   def create_snapshot!
-    snapshots.where(date: Date.today).destroy!
+    snapshots.where('date >= ?', DateTime.current.beginning_of_day).destroy_all
     snapshots.create! do |s|
       s.date = DateTime.current
-      s.snaphot = {
+      s.snapshot = {
         steps_passed: steps_passed,
         words_helped: words_helped,
         steps_helped: steps_helped,
@@ -90,7 +85,8 @@ class Unit::Advance < ActiveRecord::Base
     rand = rand(0..100)
 
     threshold = 0
-    step = nil
+    step_id = nil
+    max_step_number = steps.count - 1
 
     BOXES_NUMBER.times do |i|
       box_probability = BOXES_PROBABILITIES[i]
@@ -98,23 +94,23 @@ class Unit::Advance < ActiveRecord::Base
       threshold += box_probability
       if steps.any?
         if rand <= threshold
-          step = steps[rand(0..steps.count)]
+          step_id = steps[rand(0..max_step_number)]
           break
         end
       end
     end
 
-    if step.nil?
+    if step_id.nil?
       BOXES_NUMBER.times do |i|
         steps = send("box_#{i}".to_sym)
         if steps.any?
-          step = steps[rand(0..steps.count)]
+          step_id = steps[rand(0..max_step_number)]
           break
         end
       end
     end
 
-    step
+    Step.find(step_id)
   end
 
   def fetch_regular_step
@@ -132,9 +128,10 @@ class Unit::Advance < ActiveRecord::Base
 
     steps_units = unit.random_steps_order? ? steps_units.shuffled : steps_units.ordered
     self.steps = steps_units.pluck(:step_id)
+    steps
   end
 
   def init_boxes
-    self.box_0 = steps
+    self.box_0 = ensure_steps
   end
 end

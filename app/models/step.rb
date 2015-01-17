@@ -2,6 +2,7 @@ class Step < ActiveRecord::Base
   validates :ru, :en, presence: true
 
   has_many :steps_units, dependent: :destroy
+  has_many :units, through: :steps_units
 
   def template(language_slug)
     template = send("#{language_slug}_template")
