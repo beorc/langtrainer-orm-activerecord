@@ -1,8 +1,8 @@
 class Unit::Advance < ActiveRecord::Base
-  validates :steps, :language_id, :native_language_id, presence: true
+  BOXES_NUMBER = 5
+  BOXES_PROBABILITIES = [60, 25, 10, 8, 2]
+  validates :user, :steps, :language_id, :native_language_id, presence: true
   validates :date, uniqueness: { scope: [:user_id, :unit_id, :language_id] }
-  validates :session_token, presence: true, unless: :user_id?
-  validates :user_id, presence: true, unless: :session_token?
 
   belongs_to :user
   belongs_to :unit
@@ -10,19 +10,12 @@ class Unit::Advance < ActiveRecord::Base
 
   serialize :steps, Array
 
-  before_validation :ensure_steps
-  after_create :init_boxes
-
-  def self.languages
-    pluck(:language_id).uniq.map { |id| Language.find(id) }
+  BOXES_NUMBER.times do |i|
+    serialize "box_#{i}".to_sym, Array
   end
 
-  def self.generate_session_token
-    loop do
-      token = SecureRandom.base64(15).tr('+/=lIO0', 'pqrsxyz')
-      break token if UnitAdvance.where(session_token: token).empty?
-    end
-  end
+  before_validation :ensure_steps, on: :create
+  before_validation :init_boxes, on: :create
 
   def language
     Language.find(language_id)
@@ -79,12 +72,16 @@ class Unit::Advance < ActiveRecord::Base
 
   def create_snapshot!
     snapshots.where(date: Date.today).destroy!
-    snapshots.create!(date: Date.today,
-                      steps_passed: steps_passed,
-                      words_helped: words_helped,
-                      steps_helped: steps_helped,
-                      right_answers: right_answers,
-                      wrong_answers: wrong_answers)
+    snapshots.create! do |s|
+      s.date = DateTime.current
+      s.snaphot = {
+        steps_passed: steps_passed,
+        words_helped: words_helped,
+        steps_helped: steps_helped,
+        right_answers: right_answers,
+        wrong_answers: wrong_answers
+      }
+    end
   end
 
   private
@@ -95,21 +92,23 @@ class Unit::Advance < ActiveRecord::Base
     threshold = 0
     step = nil
 
-    boxes.ordered_by_number.each do |box|
-      box_probability = Langtrainer2.config.boxes_probabilities[box.number]
+    BOXES_NUMBER.times do |i|
+      box_probability = BOXES_PROBABILITIES[i]
+      steps = send("box_#{i}".to_sym)
       threshold += box_probability
-      if box.steps.any?
+      if steps.any?
         if rand <= threshold
-          step = box.fetch_step
+          step = steps[rand(0..steps.count)]
           break
         end
       end
     end
 
     if step.nil?
-      boxes.ordered_by_number.each do |box|
-        if box.steps.any?
-          step = box.random_step
+      BOXES_NUMBER.times do |i|
+        steps = send("box_#{i}".to_sym)
+        if steps.any?
+          step = steps[rand(0..steps.count)]
           break
         end
       end
@@ -125,13 +124,17 @@ class Unit::Advance < ActiveRecord::Base
 
   def ensure_steps
     return steps if steps.present?
-    step_mappings = unit.step_mappings.from_language(language.slug).
-                                       to_language(native_language.slug)
-    step_mappings = unit.random_steps_order? ? step_mappings.shuffled : step_mappings.ordered
-    self.steps = step_mappings.map(&:step).map(&:id)
+
+    steps_units = unit
+      .steps_units
+      .from_language(language)
+      .to_language(native_language)
+
+    steps_units = unit.random_steps_order? ? steps_units.shuffled : steps_units.ordered
+    self.steps = steps_units.pluck(:step_id)
   end
 
   def init_boxes
-    boxes.first.steps = Step.find(steps)
+    self.box_0 = steps
   end
 end

@@ -8,8 +8,6 @@ class CreateSteps < ActiveRecord::Migration
 
       t.string :ru_template
       t.string :en_template
-
-      t.string :template
     end
   end
 end

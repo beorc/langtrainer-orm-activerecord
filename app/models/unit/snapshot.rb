@@ -1,12 +1,18 @@
 class Unit::Snapshot < ActiveRecord::Base
   belongs_to :unit_advance
-  validates :unit_advance, :date, presence: true
+  has_one :user, thorugh: :unit_advance
+  has_one :unit, thorugh: :unit_advance
+  has_one :course, thorugh: :unit
+
+  validates :unit_advance, :date, :snapshot, presence: true
   validates :date, uniqueness: { scope: :unit_advance_id }
 
-  scope :with_user, ->(user) { joins(:unit_advances).where('unit_advances.user_id = ?', user.id) }
-  scope :with_course, ->(course) { joins(:unit).where('units.course_id = ?', course.id) }
-  scope :with_unit, ->(unit) { joins(:unit).where('units.id = ?', unit.id) }
-  scope :with_language, ->(language) { joins(:unit_advances).where('unit_advances.language_id = ?', language.id) }
+  serialize :snapshot, Hash
+
+  scope :with_user, ->(user) { joins(:unit_advance).where('unit_advances.user_id = ?', user.id) }
+  scope :with_course, ->(course) { joins(:unit_advance).where('units.course_id = ?', course.id) }
+  scope :with_unit, ->(unit) { joins(:unit_advance).where('unit_advances.unit_id = ?', unit.id) }
+  scope :with_language, ->(language) { joins(:unit_advance).where('unit_advances.language_id = ?', language.id) }
 
   def self.table_name_prefix
     'unit_advance'
@@ -15,7 +21,7 @@ class Unit::Snapshot < ActiveRecord::Base
   def self.with_period(period)
     case period.id
     when Period::OneDay
-      where('date = ?', Date.today)
+      where('date >= ?', DateTime.current.beginning_of_day)
     when Period::ThreeDays
       where('date >= ?', 3.days.ago)
     when Period::OneWeek
