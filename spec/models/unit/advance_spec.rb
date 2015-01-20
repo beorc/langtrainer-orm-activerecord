@@ -18,7 +18,7 @@ RSpec.describe Unit::Advance, :type => :model do
   it { should have_many(:snapshots) }
   it { should serialize(:steps) }
 
-  Unit::Advance::BOXES_NUMBER.times do |i|
+  Unit::Advance.each_box_number do |i|
     it { should serialize("box_#{i}".to_sym) }
   end
 

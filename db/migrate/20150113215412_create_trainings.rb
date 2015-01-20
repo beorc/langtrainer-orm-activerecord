@@ -1,6 +1,6 @@
-class CreateUnitAdvances < ActiveRecord::Migration
+class CreateTrainings < ActiveRecord::Migration
   def change
-    create_table :unit_advances do |t|
+    create_table :trainings do |t|
       t.references :user, index: true
       t.references :unit, index: true
       t.integer :language_id, null: false
@@ -22,9 +22,9 @@ class CreateUnitAdvances < ActiveRecord::Migration
 
       t.timestamps null: false
 
-      t.index [:unit_id, :user_id, :language_id, :native_language_id], unique: true, name: :unit_advance_uniqueness
+      t.index [:unit_id, :user_id, :language_id, :native_language_id], unique: true, name: :training_uniqueness
     end
-    add_foreign_key :unit_advances, :users
-    add_foreign_key :unit_advances, :units
+    add_foreign_key :trainings, :users
+    add_foreign_key :trainings, :units
   end
 end

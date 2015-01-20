@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
-  has_many :unit_advances, class_name: 'Unit::Advance', dependent: :destroy
-  has_many :snapshots, class_name: 'Unit::AdvanceSnapshot', through: :unit_advances
+  has_many :trainings, dependent: :destroy
+  has_many :snapshots, class_name: 'Training::Snapshot', through: :trainings
 
   validates :token, presence: true, uniqueness: true
 

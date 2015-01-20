@@ -1,4 +1,4 @@
-class Unit::Advance < ActiveRecord::Base
+class Training < ActiveRecord::Base
   BOXES_NUMBER = 5
   BOXES_PROBABILITIES = [60, 25, 10, 8, 2]
   validates :user, :unit, :language_id, :native_language_id, presence: true
@@ -6,16 +6,40 @@ class Unit::Advance < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :unit
-  has_many :snapshots, class_name: 'Unit::AdvanceSnapshot', foreign_key: :unit_advance_id, dependent: :destroy
+  has_many :snapshots, class_name: 'Training::Snapshot', dependent: :destroy
 
   serialize :steps, Array
 
-  BOXES_NUMBER.times do |i|
+  before_create :ensure_steps
+  before_create :init_boxes
+
+  def self.each_box_number
+    BOXES_NUMBER.times do |i|
+      yield i
+    end
+  end
+
+  delegate :each_box_number, to: :class
+
+  each_box_number do |i|
     serialize "box_#{i}".to_sym, Array
   end
 
-  before_create :ensure_steps
-  before_create :init_boxes
+  def steps_from_box(number)
+    send("box_#{number}")
+  end
+
+  def fetch_current_step
+    Step.find(steps[current_step])
+  end
+
+  def box_for_step(step)
+    each_box_number do |i|
+      steps = steps_from_box(i)
+
+    end
+    boxes.with_step(current_step).first
+  end
 
   def language
     Language.find(language_id)
@@ -88,9 +112,9 @@ class Unit::Advance < ActiveRecord::Base
     step_id = nil
     max_step_number = steps.count - 1
 
-    BOXES_NUMBER.times do |i|
+    each_box_number do |i|
       box_probability = BOXES_PROBABILITIES[i]
-      steps = send("box_#{i}".to_sym)
+      steps = steps_from_box(i)
       threshold += box_probability
       if steps.any?
         if rand <= threshold
@@ -101,8 +125,8 @@ class Unit::Advance < ActiveRecord::Base
     end
 
     if step_id.nil?
-      BOXES_NUMBER.times do |i|
-        steps = send("box_#{i}".to_sym)
+      each_box_number do |i|
+        steps = steps_from_box(i)
         if steps.any?
           step_id = steps[rand(0..max_step_number)]
           break
@@ -115,7 +139,7 @@ class Unit::Advance < ActiveRecord::Base
 
   def fetch_regular_step
     return if steps.count == current_step
-    Step.find(steps[current_step])
+    fetch_current_step
   end
 
   def ensure_steps

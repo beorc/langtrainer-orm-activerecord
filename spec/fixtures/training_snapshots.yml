@@ -1,6 +1,6 @@
 test:
   id: 1
-  unit_advance_id: 1
+  training_id: 1
   date: <%= DateTime.current %>
   snapshot: {
     steps_passed: 1,
