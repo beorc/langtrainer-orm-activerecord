@@ -10,7 +10,7 @@ RSpec.describe User, :type => :model do
 
   it { should validate_uniqueness_of :token }
 
-  it { should have_many :unit_advances }
+  it { should have_many :trainings }
   it { should have_many :snapshots }
 
   it 'should generate token' do

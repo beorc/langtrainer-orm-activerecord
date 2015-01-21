@@ -11,7 +11,6 @@ class Training < ActiveRecord::Base
   serialize :steps, Array
 
   before_create :ensure_steps
-  before_create :init_boxes
 
   def self.each_box_number
     BOXES_NUMBER.times do |i|
@@ -152,10 +151,7 @@ class Training < ActiveRecord::Base
 
     steps_units = unit.random_steps_order? ? steps_units.shuffled : steps_units.ordered
     self.steps = steps_units.pluck(:step_id)
+    self.box_0 = self.steps
     steps
-  end
-
-  def init_boxes
-    self.box_0 = ensure_steps
   end
 end

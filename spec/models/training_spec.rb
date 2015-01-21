@@ -1,11 +1,10 @@
 require 'rails_helper'
 
-RSpec.describe Unit::Advance, :type => :model do
-  set_fixture_class advances: Unit::Advance
-  fixtures :advances
+RSpec.describe Training, :type => :model do
+  fixtures [:users, :units, :steps, :steps_units, :trainings]
 
-  let(:advance) { advances(:first) }
-  subject { advance }
+  let(:training) { trainings(:first) }
+  subject { training }
 
   it { should be_valid }
 
@@ -18,7 +17,7 @@ RSpec.describe Unit::Advance, :type => :model do
   it { should have_many(:snapshots) }
   it { should serialize(:steps) }
 
-  Unit::Advance.each_box_number do |i|
+  Training.each_box_number do |i|
     it { should serialize("box_#{i}".to_sym) }
   end
 
@@ -73,18 +72,17 @@ RSpec.describe Unit::Advance, :type => :model do
   describe '#fetch_step' do
     before(:each) do
       subject.send(:ensure_steps)
-      subject.send(:init_boxes)
     end
 
-    it 'should have steps' do
+    it 'should set up steps' do
       expect(subject.steps).to be_present
     end
 
-    it 'should have steps' do
+    it 'should set up steps into first box' do
       expect(subject.box_0).to be_present
     end
 
-    context 'given the not revised advance' do
+    context 'given the not revised training' do
       it 'should call fetch_regular_step' do
         expect(subject).to receive(:fetch_regular_step)
         subject.fetch_step
@@ -95,8 +93,8 @@ RSpec.describe Unit::Advance, :type => :model do
       end
     end
 
-    context 'given the revised advance' do
-      let(:advance) { advances(:revised) }
+    context 'given the revised training' do
+      let(:training) { trainings(:revised) }
 
       it 'should call fetch_step_from_boxes' do
         expect(subject).to receive(:fetch_step_from_boxes)

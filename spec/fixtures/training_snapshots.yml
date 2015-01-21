@@ -1,4 +1,4 @@
-test:
+first:
   id: 1
   training_id: 1
   date: <%= DateTime.current %>

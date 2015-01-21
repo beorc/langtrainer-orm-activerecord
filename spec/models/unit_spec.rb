@@ -14,5 +14,5 @@ RSpec.describe Unit, :type => :model do
 
   it { should belong_to(:course) }
   it { should have_many(:steps) }
-  it { should have_many(:unit_advances) }
+  it { should have_many(:trainings) }
 end
