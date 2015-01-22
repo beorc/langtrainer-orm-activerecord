@@ -1,20 +1,20 @@
 class Step < ActiveRecord::Base
-  validates :ru, :en, presence: true
+  validates :ru_answers, :en_answers, presence: true
 
   has_many :steps_units, dependent: :destroy
   has_many :units, through: :steps_units
 
-  def template(language_slug)
-    template = send("#{language_slug}_template")
-    return template.present? ? template : send(language_slug)
+  def question(language_slug)
+    question = send("#{language_slug}_question")
+    question.present? ? question : first_answer(language_slug)
   end
 
-  def regexp(language_slug)
-    send("#{language_slug}_regexp")
+  def first_answer(language_slug)
+    answers = send("#{language_slug}_answers").to_s
+    answers.split('|').first
   end
 
   def title
-    ru
+    question(:ru)
   end
 end
-

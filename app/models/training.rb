@@ -24,20 +24,33 @@ class Training < ActiveRecord::Base
     serialize "box_#{i}".to_sym, Array
   end
 
-  def steps_from_box(number)
-    send("box_#{number}")
+  def push_current_step_to_first_box!
+    current_step_id = fetch_current_step.id
+    each_box_number do |i|
+      step_number = steps_from_box(i).delete(current_step_id)
+      if step_number
+        steps_from_box(0).push(step_number)
+        save!
+      end
+    end
+  end
+
+  def push_current_step_to_next_box!
+    current_step_id = fetch_current_step.id
+    each_box_number do |i|
+      next_box_number = i + 1
+      if next_box_number < BOXES_NUMBER
+        step_number = steps_from_box(i).delete(current_step_id)
+        if step_number
+          steps_from_box(next_box_number).push(step_number)
+          save!
+        end
+      end
+    end
   end
 
   def fetch_current_step
     Step.find(steps[current_step])
-  end
-
-  def box_for_step(step)
-    each_box_number do |i|
-      steps = steps_from_box(i)
-
-    end
-    boxes.with_step(current_step).first
   end
 
   def language
@@ -78,13 +91,14 @@ class Training < ActiveRecord::Base
 
   def advance!
     increment!(:current_step)
+    revised! if steps.count == current_step
   end
 
   def fetch_step
     if revised?
       fetch_step_from_boxes
     else
-      fetch_regular_step
+      fetch_current_step
     end
   end
 
@@ -136,11 +150,6 @@ class Training < ActiveRecord::Base
     Step.find(step_id)
   end
 
-  def fetch_regular_step
-    return if steps.count == current_step
-    fetch_current_step
-  end
-
   def ensure_steps
     return steps if steps.present?
 
@@ -153,5 +162,15 @@ class Training < ActiveRecord::Base
     self.steps = steps_units.pluck(:step_id)
     self.box_0 = self.steps
     steps
+  end
+
+  def steps_from_box(number)
+    attr_name = "box_#{number}"
+
+    if respond_to?(attr_name)
+      return send(attr_name)
+    else
+      return []
+    end
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150120065605) do
+ActiveRecord::Schema.define(version: 20150113220516) do
 
   create_table "courses", force: :cascade do |t|
     t.string   "slug",                       null: false
@@ -24,12 +24,12 @@ ActiveRecord::Schema.define(version: 20150120065605) do
   add_index "courses", ["slug"], name: "index_courses_on_slug", unique: true
 
   create_table "steps", force: :cascade do |t|
-    t.string "en"
-    t.string "en_regexp"
-    t.string "ru"
-    t.string "ru_regexp"
+    t.text   "en"
+    t.text   "ru"
     t.string "ru_template"
+    t.string "ru_help"
     t.string "en_template"
+    t.string "en_help"
   end
 
   create_table "steps_units", force: :cascade do |t|

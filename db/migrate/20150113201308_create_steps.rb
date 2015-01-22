@@ -1,13 +1,14 @@
 class CreateSteps < ActiveRecord::Migration
   def change
     create_table :steps do |t|
-      t.string :en
-      t.string :en_regexp
-      t.string :ru
-      t.string :ru_regexp
+      t.text :en_answers, null: false
+      t.text :ru_answers, null: false
 
-      t.string :ru_template
-      t.string :en_template
+      t.string :ru_question
+      t.string :ru_help
+
+      t.string :en_question
+      t.string :en_help
     end
   end
 end

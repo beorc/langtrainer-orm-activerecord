@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Training::Snapshot, :type => :model do
   set_fixture_class training_snapshots: Training::Snapshot
-  fixtures :training_snapshots
+  fixtures [:trainings, :training_snapshots]
 
   let(:snapshot) { training_snapshots(:first) }
   subject { snapshot }
