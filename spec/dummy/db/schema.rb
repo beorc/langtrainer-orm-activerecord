@@ -24,11 +24,11 @@ ActiveRecord::Schema.define(version: 20150113220516) do
   add_index "courses", ["slug"], name: "index_courses_on_slug", unique: true
 
   create_table "steps", force: :cascade do |t|
-    t.text   "en"
-    t.text   "ru"
-    t.string "ru_template"
+    t.text   "en_answers",  null: false
+    t.text   "ru_answers",  null: false
+    t.string "ru_question"
     t.string "ru_help"
-    t.string "en_template"
+    t.string "en_question"
     t.string "en_help"
   end
 

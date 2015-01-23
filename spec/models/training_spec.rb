@@ -84,7 +84,7 @@ RSpec.describe Training, :type => :model do
 
     context 'given the not revised training' do
       it 'should call fetch_regular_step' do
-        expect(subject).to receive(:fetch_regular_step)
+        expect(subject).to receive(:fetch_current_step)
         subject.fetch_step
       end
 
@@ -107,28 +107,37 @@ RSpec.describe Training, :type => :model do
     end
   end
 
-  describe '#put_current_step_to_first_box!' do
-    it 'should move current step id to the first box' do
-      subject.box_3.push(subject.fetch_current_step.id)
-      subject.push_current_step_to_first_box!
-      expect(subject.box_0).to include(subject.fetch_current_step.id)
-    end
-  end
+  describe 'given initialized boxes' do
+    let(:step_id) { subject.fetch_current_step.id }
 
-  describe '#put_current_step_to_next_box!' do
-    context 'when current step is not in the last box' do
-      it 'should move current step id to the next box' do
-        subject.box_3.push(subject.fetch_current_step.id)
-        subject.push_current_step_to_next_box!
-        expect(subject.box_4).to include(subject.fetch_current_step.id)
+    before(:each) do
+      subject.send(:ensure_steps)
+      subject.box_0.delete(step_id)
+    end
+
+    describe '#put_current_step_to_first_box!' do
+      it 'should move current step id to the first box' do
+        subject.box_3.push(step_id)
+        subject.push_current_step_to_first_box!
+        expect(subject.box_0).to include(step_id)
       end
     end
 
-    context 'when current step is in the last box' do
-      it 'should not touch current step' do
-        subject.box_4.push(subject.fetch_current_step.id)
-        subject.push_current_step_to_next_box!
-        expect(subject.box_4).to include(subject.fetch_current_step.id)
+    describe '#put_current_step_to_next_box!' do
+      context 'when current step is not in the last box' do
+        it 'should move current step id to the next box' do
+          subject.box_3.push(step_id)
+          subject.push_current_step_to_next_box!
+          expect(subject.box_4).to include(step_id)
+        end
+      end
+
+      context 'when current step is in the last box' do
+        it 'should not touch current step' do
+          subject.box_4.push(step_id)
+          subject.push_current_step_to_next_box!
+          expect(subject.box_4).to include(step_id)
+        end
       end
     end
   end

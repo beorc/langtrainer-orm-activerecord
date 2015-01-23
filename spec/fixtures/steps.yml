@@ -1,12 +1,12 @@
 first:
   id: 1
-  en: 'first'
-  ru: 'первый'
+  en_answers: 'first'
+  ru_answers: 'первый'
 second:
   id: 2
-  en: 'second'
-  ru: 'второй'
+  en_answers: 'second'
+  ru_answers: 'второй'
 third:
   id: 3
-  en: 'third'
-  ru: 'третий'
+  en_answers: 'third'
+  ru_answers: 'третий'

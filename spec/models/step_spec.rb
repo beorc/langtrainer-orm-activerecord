@@ -8,7 +8,7 @@ RSpec.describe Step, :type => :model do
 
   it { should be_valid }
 
-  it { should validate_presence_of(:ru) }
-  it { should validate_presence_of(:en) }
+  it { should validate_presence_of(:ru_answers) }
+  it { should validate_presence_of(:en_answers) }
   it { should have_many(:units) }
 end
