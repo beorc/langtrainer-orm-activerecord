@@ -6,15 +6,21 @@ class Step < ActiveRecord::Base
 
   def question(language_slug)
     question = send("#{language_slug}_question")
-    question.present? ? question : first_answer(language_slug)
-  end
-
-  def first_answer(language_slug)
-    answers = send("#{language_slug}_answers").to_s
-    answers.split('|').first
+    question.present? ? question : answers(language_slug).first
   end
 
   def title
-    question(:ru)
+    question(:en)
+  end
+
+  def right_answer?(language_slug, answer)
+    answers(language_slug).include?(answer)
+  end
+
+  private
+
+  def answers(language_slug)
+    answers = send("#{language_slug}_answers").to_s
+    answers.split('|')
   end
 end

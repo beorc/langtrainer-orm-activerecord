@@ -24,6 +24,10 @@ class Training < ActiveRecord::Base
     serialize "box_#{i}".to_sym, Array
   end
 
+  def right_answer?(answer)
+    fetch_current_step.right_answer?(language.slug, answer)
+  end
+
   def push_current_step_to_first_box!
     current_step_id = fetch_current_step.id
     each_box_number do |i|
