@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150113220516) do
+ActiveRecord::Schema.define(version: 20150124095303) do
 
   create_table "courses", force: :cascade do |t|
     t.string   "slug",                       null: false
@@ -67,7 +67,7 @@ ActiveRecord::Schema.define(version: 20150113220516) do
     t.integer  "steps_helped",         default: 0
     t.integer  "right_answers",        default: 0
     t.integer  "wrong_answers",        default: 0
-    t.text     "steps"
+    t.text     "step_ids"
     t.text     "box_0"
     t.text     "box_1"
     t.text     "box_2"

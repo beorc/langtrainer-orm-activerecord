@@ -15,7 +15,7 @@ RSpec.describe Training, :type => :model do
   it { should validate_uniqueness_of(:unit).scoped_to([:user_id, :language_id, :native_language_id]) }
 
   it { should have_many(:snapshots) }
-  it { should serialize(:steps) }
+  it { should serialize(:step_ids) }
 
   Training.each_box_number do |i|
     it { should serialize("box_#{i}".to_sym) }
@@ -69,17 +69,23 @@ RSpec.describe Training, :type => :model do
     end
   end
 
+  describe '#ensure_step_ids' do
+    before(:each) do
+      subject.send(:ensure_step_ids)
+    end
+
+    it 'should set up step_ids' do
+      expect(subject.step_ids).to be_present
+    end
+
+    it 'should set up step ids into first box' do
+      expect(subject.box_0).to be_present
+    end
+  end
+
   describe '#fetch_step' do
     before(:each) do
-      subject.send(:ensure_steps)
-    end
-
-    it 'should set up steps' do
-      expect(subject.steps).to be_present
-    end
-
-    it 'should set up steps into first box' do
-      expect(subject.box_0).to be_present
+      subject.send(:ensure_step_ids)
     end
 
     context 'given the not revised training' do
@@ -111,7 +117,7 @@ RSpec.describe Training, :type => :model do
     let(:step_id) { subject.fetch_current_step.id }
 
     before(:each) do
-      subject.send(:ensure_steps)
+      subject.send(:ensure_step_ids)
       subject.box_0.delete(step_id)
     end
 

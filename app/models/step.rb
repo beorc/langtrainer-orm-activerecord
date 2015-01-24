@@ -17,8 +17,6 @@ class Step < ActiveRecord::Base
     answers(language_slug).include?(answer)
   end
 
-  private
-
   def answers(language_slug)
     answers = send("#{language_slug}_answers").to_s
     answers.split('|')
