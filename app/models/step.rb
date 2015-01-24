@@ -19,6 +19,6 @@ class Step < ActiveRecord::Base
 
   def answers(language_slug)
     answers = send("#{language_slug}_answers").to_s
-    answers.split('|')
+    answers.split('|').map(&:strip)
   end
 end
