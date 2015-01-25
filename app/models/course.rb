@@ -5,5 +5,5 @@ class Course < ActiveRecord::Base
   has_many :steps_units, through: :units
   has_many :steps, through: :steps_units
 
-  scope :published_only, -> { where(published: true) }
+  scope :published, -> { where(published: true) }
 end

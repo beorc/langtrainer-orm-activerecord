@@ -7,6 +7,6 @@ class Unit < ActiveRecord::Base
   has_many :steps, through: :steps_units
   has_many :trainings, dependent: :destroy
 
-  scope :published_only, -> { where(published: true) }
+  scope :published, -> { where(published: true) }
 end
 
