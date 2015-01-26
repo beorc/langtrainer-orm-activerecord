@@ -41,6 +41,10 @@ class Language
     slug == :de
   end
 
+  def self.published
+    [english, russian]
+  end
+
   def self.except(language)
     collection = all.clone
     collection.delete language

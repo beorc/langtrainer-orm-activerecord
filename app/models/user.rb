@@ -4,14 +4,26 @@ class User < ActiveRecord::Base
 
   validates :token, presence: true, uniqueness: true
 
-  before_validation :generate_token, on: :create
+  def fetch_or_create_by!(token)
+    user = nil
+
+    if token.present?
+      user = User.uncached.find_by(token: token)
+    end
+
+    if user.nil?
+      user = User.create!(token: generate_token)
+    end
+
+    user
+  end
 
   private
 
   def generate_token
-    self.token ||= loop do
+    loop do
       token = SecureRandom.uuid
-      break token if User.where(token: token).empty?
+      break token if User.uncached.where(token: token).empty?
     end
   end
 end

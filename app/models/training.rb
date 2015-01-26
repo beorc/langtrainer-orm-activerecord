@@ -12,6 +12,8 @@ class Training < ActiveRecord::Base
 
   before_create :ensure_step_ids
 
+  scope :for_unit, -> (unit) { where(unit: unit) }
+
   def self.each_box_number
     BOXES_NUMBER.times do |i|
       yield i
