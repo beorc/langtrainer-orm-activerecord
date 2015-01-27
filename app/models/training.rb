@@ -159,6 +159,8 @@ class Training < ActiveRecord::Base
   def ensure_step_ids
     return step_ids if step_ids.present?
 
+    reserved_step = user.current_step_for(unit)
+
     steps_units = unit
       .steps_units
       .from_language(language)
@@ -166,6 +168,10 @@ class Training < ActiveRecord::Base
 
     steps_units = unit.random_steps_order? ? steps_units.shuffled : steps_units.ordered
     self.step_ids = steps_units.pluck(:step_id)
+
+    self.step_ids.delete reserved_step.id
+    self.step_ids.unshift reserved_step.id
+
     self.box_0 = self.step_ids
     step_ids
   end

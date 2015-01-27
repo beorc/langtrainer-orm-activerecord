@@ -4,7 +4,7 @@ class User < ActiveRecord::Base
 
   validates :token, presence: true, uniqueness: true
 
-  def fetch_or_create_by!(token)
+  def self.fetch_or_create_by!(token)
     user = nil
 
     if token.present?
@@ -16,6 +16,18 @@ class User < ActiveRecord::Base
     end
 
     user
+  end
+
+  def current_step_for(unit)
+    step = nil
+    training = trainings.for_unit(unit).first
+    if training
+      step = training.fetch_current_step
+    else
+      step = unit.steps.first
+    end
+
+    step
   end
 
   private
