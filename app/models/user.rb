@@ -32,10 +32,10 @@ class User < ActiveRecord::Base
 
   private
 
-  def generate_token
+  def self.generate_token
     loop do
       token = SecureRandom.uuid
-      break token if User.uncached.where(token: token).empty?
+      break token if User.uncached { where(token: token).empty? }
     end
   end
 end

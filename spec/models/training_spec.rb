@@ -117,7 +117,7 @@ RSpec.describe Training, :type => :model do
     let(:step_id) { subject.fetch_current_step.id }
 
     before(:each) do
-      subject.send(:ensure_step_ids)
+      subject.ensure_step_ids
       subject.box_0.delete(step_id)
     end
 

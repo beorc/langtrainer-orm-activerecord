@@ -13,7 +13,9 @@ RSpec.describe User, :type => :model do
   it { should have_many :trainings }
   it { should have_many :snapshots }
 
-  it 'should generate token' do
-    expect(User.create!.token).to be_present
+  describe '.fetch_or_create_by!' do
+    it 'should set up token' do
+      expect(User.fetch_or_create_by!(nil).token).to be_present
+    end
   end
 end
