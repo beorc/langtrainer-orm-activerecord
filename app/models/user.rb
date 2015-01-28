@@ -8,7 +8,7 @@ class User < ActiveRecord::Base
     user = nil
 
     if token.present?
-      user = User.uncached.find_by(token: token)
+      user = User.uncached { find_by(token: token) }
     end
 
     if user.nil?
