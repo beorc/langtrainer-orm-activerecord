@@ -1,7 +1,7 @@
 class Training < ActiveRecord::Base
   BOXES_NUMBER = 5
   BOXES_PROBABILITIES = [60, 25, 10, 8, 2]
-  validates :user, :unit, :language_id, :native_language_id, presence: true
+  validates :user, :unit, :current_step_id, :language_id, :native_language_id, presence: true
   validates :unit, uniqueness: { scope: [:user_id, :language_id, :native_language_id] }
 
   belongs_to :user

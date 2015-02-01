@@ -13,8 +13,14 @@ class Step < ActiveRecord::Base
     question(:en)
   end
 
+  def prepare_answer(answer)
+    answer.gsub(/\s{2,}/, ' ')
+  end
+
   def right_answer?(language_slug, answer)
-    answers(language_slug).include?(answer)
+    answers(language_slug).find do |rightAnswer|
+      !!/#{prepare_answer(answer)}/.match(rightAnswer)
+    end.present?
   end
 
   def answers(language_slug)
