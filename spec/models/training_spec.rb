@@ -59,7 +59,8 @@ RSpec.describe Training, :type => :model do
 
   describe '#advance!' do
     it 'should increment the current_step' do
-      expect{subject.advance!}.to change(subject, :current_step).by(1)
+      subject.ensure_step_ids
+      expect{subject.advance!}.to change(subject, :current_step_id)
     end
   end
 
@@ -71,7 +72,7 @@ RSpec.describe Training, :type => :model do
 
   describe '#ensure_step_ids' do
     before(:each) do
-      subject.send(:ensure_step_ids)
+      subject.ensure_step_ids
     end
 
     it 'should set up step_ids' do

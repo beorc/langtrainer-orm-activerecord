@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150124095303) do
+ActiveRecord::Schema.define(version: 20150201091512) do
 
   create_table "courses", force: :cascade do |t|
     t.string   "slug",                       null: false
@@ -73,11 +73,11 @@ ActiveRecord::Schema.define(version: 20150124095303) do
     t.text     "box_2"
     t.text     "box_3"
     t.text     "box_4"
-    t.integer  "current_step",         default: 0
     t.boolean  "revised",              default: false
     t.integer  "revised_steps_number", default: 0
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
+    t.integer  "current_step_id"
   end
 
   add_index "trainings", ["unit_id", "user_id", "language_id", "native_language_id"], name: "training_uniqueness", unique: true

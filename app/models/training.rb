@@ -29,7 +29,6 @@ class Training < ActiveRecord::Base
   end
 
   def push_current_step_to_first_box!
-    current_step_id = fetch_current_step.id
     each_box_number do |i|
       step_number = step_ids_from_box(i).delete(current_step_id)
       if step_number
@@ -40,7 +39,6 @@ class Training < ActiveRecord::Base
   end
 
   def push_current_step_to_next_box!
-    current_step_id = fetch_current_step.id
     each_box_number do |i|
       next_box_number = i + 1
       if next_box_number < BOXES_NUMBER
@@ -54,7 +52,7 @@ class Training < ActiveRecord::Base
   end
 
   def fetch_current_step
-    Step.find(step_ids[current_step])
+    Step.find(current_step_id)
   end
 
   def language
@@ -94,8 +92,9 @@ class Training < ActiveRecord::Base
   end
 
   def advance!
-    increment!(:current_step)
-    revised! if step_ids.count == current_step
+    index = step_ids.index(current_step_id)
+    self.current_step_id = step_ids[index + 1]
+    revised! unless current_step_id
   end
 
   def fetch_step
@@ -137,6 +136,7 @@ class Training < ActiveRecord::Base
     self.step_ids.unshift reserved_step.id
 
     self.box_0 = self.step_ids
+    self.current_step_id = step_ids.first
     step_ids
   end
 
@@ -146,7 +146,6 @@ class Training < ActiveRecord::Base
     rand = rand(0..100)
 
     threshold = 0
-    step_id = nil
     max_step_number = self.step_ids.count - 1
 
     each_box_number do |i|
@@ -155,23 +154,23 @@ class Training < ActiveRecord::Base
       threshold += box_probability
       if step_ids.any?
         if rand <= threshold
-          step_id = step_ids[rand(0..max_step_number)]
+          self.current_step_id = step_ids[rand(0..max_step_number)]
           break
         end
       end
     end
 
-    if step_id.nil?
+    if current_step_id.nil?
       each_box_number do |i|
         step_ids = step_ids_from_box(i)
         if step_ids.any?
-          step_id = step_ids[rand(0..max_step_number)]
+          self.current_step_id = step_ids[rand(0..max_step_number)]
           break
         end
       end
     end
 
-    Step.find(step_id)
+    fetch_current_step
   end
 
   def step_ids_from_box(number)
