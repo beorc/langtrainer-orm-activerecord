@@ -22,7 +22,7 @@ class User < ActiveRecord::Base
     step = nil
     training = trainings.for_unit(unit).first
     if training
-      step = training.fetch_current_step
+      step = training.current_step
     else
       step = unit.steps.first
     end

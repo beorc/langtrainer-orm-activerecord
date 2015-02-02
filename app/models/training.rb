@@ -6,6 +6,7 @@ class Training < ActiveRecord::Base
 
   belongs_to :user
   belongs_to :unit
+  belongs_to :current_step, class_name: 'Step'
   has_many :snapshots, class_name: 'Training::Snapshot', dependent: :destroy
 
   serialize :step_ids, Array
@@ -25,7 +26,7 @@ class Training < ActiveRecord::Base
   end
 
   def right_answer?(answer)
-    fetch_current_step.right_answer?(language.slug, answer)
+    current_step.right_answer?(language.slug, answer)
   end
 
   def push_current_step_to_first_box!
@@ -49,10 +50,6 @@ class Training < ActiveRecord::Base
         end
       end
     end
-  end
-
-  def fetch_current_step
-    Step.find(current_step_id)
   end
 
   def language
@@ -101,7 +98,7 @@ class Training < ActiveRecord::Base
     if revised?
       fetch_step_from_boxes
     else
-      fetch_current_step
+      current_step
     end
   end
 
@@ -170,7 +167,7 @@ class Training < ActiveRecord::Base
       end
     end
 
-    fetch_current_step
+    current_step
   end
 
   def step_ids_from_box(number)

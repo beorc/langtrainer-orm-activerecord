@@ -91,7 +91,7 @@ RSpec.describe Training, :type => :model do
 
     context 'given the not revised training' do
       it 'should call fetch_regular_step' do
-        expect(subject).to receive(:fetch_current_step)
+        expect(subject).to receive(:current_step)
         subject.fetch_step
       end
 
@@ -115,7 +115,7 @@ RSpec.describe Training, :type => :model do
   end
 
   describe 'given initialized boxes' do
-    let(:step_id) { subject.fetch_current_step.id }
+    let(:step_id) { subject.current_step_id }
 
     before(:each) do
       subject.ensure_step_ids
