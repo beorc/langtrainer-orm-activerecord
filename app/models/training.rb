@@ -9,9 +9,9 @@ class Training < ActiveRecord::Base
   belongs_to :current_step, class_name: 'Step'
   has_many :snapshots, class_name: 'Training::Snapshot', dependent: :destroy
 
-  serialize :step_ids, Array
-
   scope :for_unit, -> (unit) { where(unit: unit) }
+
+  before_create :ensure_boxes
 
   def self.each_box_number
     BOXES_NUMBER.times do |i|
@@ -80,26 +80,40 @@ class Training < ActiveRecord::Base
     increment!(:wrong_answers)
   end
 
-  def revised!
-    update_attribute(:revised, true)
-  end
-
   def step_revised!
     increment!(:revised_steps_number)
   end
 
-  def advance!
-    index = step_ids.index(current_step_id)
-    self.current_step_id = step_ids[index + 1]
-    revised! unless current_step_id
-  end
+  def fetch_step!
+    rand = rand(0..100)
 
-  def fetch_step
-    if revised?
-      fetch_step_from_boxes
-    else
-      current_step
+    threshold = 0
+    each_box_number do |i|
+      box_probability = BOXES_PROBABILITIES[i]
+      step_ids = step_ids_from_box(i)
+      threshold += box_probability
+      if step_ids.any?
+        if rand <= threshold
+          max_step_number = step_ids.count - 1
+          self.current_step_id = step_ids[rand(0..max_step_number)]
+          break
+        end
+      end
     end
+
+    if current_step_id.nil?
+      each_box_number do |i|
+        step_ids = step_ids_from_box(i)
+        if step_ids.any?
+          max_step_number = step_ids.count - 1
+          self.current_step_id = step_ids[rand(0..max_step_number)]
+          break
+        end
+      end
+    end
+
+    save!
+    current_step
   end
 
   def create_snapshot!
@@ -116,8 +130,8 @@ class Training < ActiveRecord::Base
     end
   end
 
-  def ensure_step_ids
-    return step_ids if step_ids.present?
+  def ensure_boxes
+    return if box_0.present?
 
     reserved_step = unit.steps.first
 
@@ -127,48 +141,16 @@ class Training < ActiveRecord::Base
       .to_language(native_language)
 
     steps_units = unit.random_steps_order? ? steps_units.shuffled : steps_units.ordered
-    self.step_ids = steps_units.pluck(:step_id)
+    step_ids = steps_units.pluck(:step_id)
 
-    self.step_ids.delete reserved_step.id
-    self.step_ids.unshift reserved_step.id
+    step_ids.delete reserved_step.id
+    step_ids.unshift reserved_step.id
 
-    self.box_0 = self.step_ids
+    self.box_0 = step_ids
     self.current_step_id = step_ids.first
-    step_ids
   end
 
   private
-
-  def fetch_step_from_boxes
-    rand = rand(0..100)
-
-    threshold = 0
-    max_step_number = self.step_ids.count - 1
-
-    each_box_number do |i|
-      box_probability = BOXES_PROBABILITIES[i]
-      step_ids = step_ids_from_box(i)
-      threshold += box_probability
-      if step_ids.any?
-        if rand <= threshold
-          self.current_step_id = step_ids[rand(0..max_step_number)]
-          break
-        end
-      end
-    end
-
-    if current_step_id.nil?
-      each_box_number do |i|
-        step_ids = step_ids_from_box(i)
-        if step_ids.any?
-          self.current_step_id = step_ids[rand(0..max_step_number)]
-          break
-        end
-      end
-    end
-
-    current_step
-  end
 
   def step_ids_from_box(number)
     attr_name = "box_#{number}"

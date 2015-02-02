@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150201091512) do
+ActiveRecord::Schema.define(version: 20150202082943) do
 
   create_table "courses", force: :cascade do |t|
     t.string   "slug",                       null: false
@@ -60,23 +60,21 @@ ActiveRecord::Schema.define(version: 20150201091512) do
   create_table "trainings", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "unit_id"
-    t.integer  "language_id",                          null: false
-    t.integer  "native_language_id",                   null: false
+    t.integer  "language_id",                      null: false
+    t.integer  "native_language_id",               null: false
     t.integer  "steps_passed",         default: 0
     t.integer  "words_helped",         default: 0
     t.integer  "steps_helped",         default: 0
     t.integer  "right_answers",        default: 0
     t.integer  "wrong_answers",        default: 0
-    t.text     "step_ids"
     t.text     "box_0"
     t.text     "box_1"
     t.text     "box_2"
     t.text     "box_3"
     t.text     "box_4"
-    t.boolean  "revised",              default: false
     t.integer  "revised_steps_number", default: 0
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
     t.integer  "current_step_id"
   end
 

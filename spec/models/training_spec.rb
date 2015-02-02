@@ -15,7 +15,6 @@ RSpec.describe Training, :type => :model do
   it { should validate_uniqueness_of(:unit).scoped_to([:user_id, :language_id, :native_language_id]) }
 
   it { should have_many(:snapshots) }
-  it { should serialize(:step_ids) }
 
   Training.each_box_number do |i|
     it { should serialize("box_#{i}".to_sym) }
@@ -45,22 +44,9 @@ RSpec.describe Training, :type => :model do
     end
   end
 
-  describe '#revised!' do
-    it 'should change revised to true' do
-      expect{subject.revised!}.to change(subject, :revised).to(true)
-    end
-  end
-
   describe '#step_revised!' do
     it 'should increment the revised_steps_number' do
       expect{subject.step_revised!}.to change(subject, :revised_steps_number).by(1)
-    end
-  end
-
-  describe '#advance!' do
-    it 'should increment the current_step' do
-      subject.ensure_step_ids
-      expect{subject.advance!}.to change(subject, :current_step_id)
     end
   end
 
@@ -70,13 +56,9 @@ RSpec.describe Training, :type => :model do
     end
   end
 
-  describe '#ensure_step_ids' do
+  describe '#ensure_boxes' do
     before(:each) do
-      subject.ensure_step_ids
-    end
-
-    it 'should set up step_ids' do
-      expect(subject.step_ids).to be_present
+      subject.ensure_boxes
     end
 
     it 'should set up step ids into first box' do
@@ -84,32 +66,19 @@ RSpec.describe Training, :type => :model do
     end
   end
 
-  describe '#fetch_step' do
+  describe '#fetch_step!' do
     before(:each) do
-      subject.send(:ensure_step_ids)
+      subject.send(:ensure_boxes)
     end
 
     context 'given the not revised training' do
       it 'should call fetch_regular_step' do
         expect(subject).to receive(:current_step)
-        subject.fetch_step
+        subject.fetch_step!
       end
 
       it 'should return a step' do
-        expect(subject.fetch_step).to be_a Step
-      end
-    end
-
-    context 'given the revised training' do
-      let(:training) { trainings(:revised) }
-
-      it 'should call fetch_step_from_boxes' do
-        expect(subject).to receive(:fetch_step_from_boxes)
-        subject.fetch_step
-      end
-
-      it 'should return a step' do
-        expect(subject.fetch_step).to be_a Step
+        expect(subject.fetch_step!).to be_a Step
       end
     end
   end
@@ -118,7 +87,7 @@ RSpec.describe Training, :type => :model do
     let(:step_id) { subject.current_step_id }
 
     before(:each) do
-      subject.ensure_step_ids
+      subject.ensure_boxes
       subject.box_0.delete(step_id)
     end
 
