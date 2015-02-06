@@ -13,13 +13,14 @@ class Step < ActiveRecord::Base
     question(:en)
   end
 
-  def prepare_answer(answer)
-    answer.gsub(/\s{2,}/, ' ')
+  def sanitize_text(text)
+    text.squish
   end
 
   def right_answer?(language_slug, answer)
+    sanitizedAnswer = sanitize_text(answer)
     answers(language_slug).find do |rightAnswer|
-      !!/#{prepare_answer(answer)}/.match(rightAnswer)
+      !!/#{sanitizedAnswer}/.match(sanitize_text(rightAnswer))
     end.present?
   end
 
