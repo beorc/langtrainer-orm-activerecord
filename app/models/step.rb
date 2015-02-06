@@ -14,13 +14,13 @@ class Step < ActiveRecord::Base
   end
 
   def sanitize_text(text)
-    text.squish
+    text.squish.downcase
   end
 
   def right_answer?(language_slug, answer)
     sanitizedAnswer = sanitize_text(answer)
     answers(language_slug).find do |rightAnswer|
-      !!/#{sanitizedAnswer}/.match(sanitize_text(rightAnswer))
+      sanitizedAnswer == sanitize_text(rightAnswer)
     end.present?
   end
 
