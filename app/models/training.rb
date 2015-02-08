@@ -99,7 +99,11 @@ class Training < ActiveRecord::Base
       if step_ids.any?
         if rand <= threshold
           max_step_number = step_ids.count - 1
-          self.current_step_id = step_ids[rand(0..max_step_number)]
+          if unit.random_steps_order?
+            self.current_step_id = step_ids[rand(0..max_step_number)]
+          else
+            self.current_step_id = step_ids.first
+          end
           break
         end
       end
@@ -110,7 +114,11 @@ class Training < ActiveRecord::Base
         step_ids = step_ids_from_box(i)
         if step_ids.any?
           max_step_number = step_ids.count - 1
-          self.current_step_id = step_ids[rand(0..max_step_number)]
+          if unit.random_steps_order?
+            self.current_step_id = step_ids[rand(0..max_step_number)]
+          else
+            self.current_step_id = step_ids.first
+          end
           break
         end
       end
@@ -140,7 +148,7 @@ class Training < ActiveRecord::Base
       .from_language(language)
       .to_language(native_language)
 
-    steps_units = unit.random_steps_order? ? steps_units.shuffled : steps_units.ordered
+    steps_units = steps_units.ordered
     step_ids = steps_units.pluck(:step_id)
 
     step_ids.delete reserved_step.id
