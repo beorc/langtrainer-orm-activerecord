@@ -4,6 +4,10 @@ class User < ActiveRecord::Base
   validates :token, presence: true, uniqueness: true
 
   def self.fetch_or_create_by!(token)
+    User.uncached { find_or_create_by!(token: token) }
+  end
+
+  def self.fetch(token)
     user = nil
 
     if token.present?
@@ -11,7 +15,7 @@ class User < ActiveRecord::Base
     end
 
     if user.nil?
-      user = User.create!(token: generate_token)
+      user = User.new(token: generate_token)
     end
 
     user
@@ -28,8 +32,6 @@ class User < ActiveRecord::Base
 
     step
   end
-
-  private
 
   def self.generate_token
     loop do
