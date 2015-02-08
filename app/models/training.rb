@@ -35,6 +35,7 @@ class Training < ActiveRecord::Base
       if step_number
         step_ids_from_box(0).push(step_number)
         save!
+        break
       end
     end
   end
@@ -47,6 +48,7 @@ class Training < ActiveRecord::Base
         if step_number
           step_ids_from_box(next_box_number).push(step_number)
           save!
+          break
         end
       end
     end
