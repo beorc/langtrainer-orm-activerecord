@@ -114,11 +114,7 @@ class Training < ActiveRecord::Base
         step_ids = step_ids_from_box(i)
         if step_ids.any?
           max_step_number = step_ids.count - 1
-          if unit.random_steps_order?
-            self.current_step_id = step_ids[rand(0..max_step_number)]
-          else
-            self.current_step_id = step_ids.first
-          end
+          self.current_step_id = step_ids[rand(0..max_step_number)]
           break
         end
       end
