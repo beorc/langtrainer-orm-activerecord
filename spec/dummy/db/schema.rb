@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150202082943) do
+ActiveRecord::Schema.define(version: 20150208081450) do
 
   create_table "courses", force: :cascade do |t|
     t.string   "slug",                       null: false
@@ -46,17 +46,6 @@ ActiveRecord::Schema.define(version: 20150202082943) do
   add_index "steps_units", ["step_id", "unit_id"], name: "index_steps_units_on_step_id_and_unit_id", unique: true
   add_index "steps_units", ["step_id"], name: "index_steps_units_on_step_id"
 
-  create_table "training_snapshots", force: :cascade do |t|
-    t.integer  "training_id"
-    t.text     "snapshot",    null: false
-    t.datetime "date",        null: false
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-  end
-
-  add_index "training_snapshots", ["date"], name: "index_training_snapshots_on_date"
-  add_index "training_snapshots", ["training_id", "date"], name: "index_training_snapshots_on_training_id_and_date"
-
   create_table "trainings", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "unit_id"
@@ -76,6 +65,7 @@ ActiveRecord::Schema.define(version: 20150202082943) do
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
     t.integer  "current_step_id"
+    t.text     "snapshots"
   end
 
   add_index "trainings", ["unit_id", "user_id", "language_id", "native_language_id"], name: "training_uniqueness", unique: true

@@ -14,8 +14,6 @@ RSpec.describe Training, :type => :model do
   it { should validate_presence_of(:native_language_id) }
   it { should validate_uniqueness_of(:unit).scoped_to([:user_id, :language_id, :native_language_id]) }
 
-  it { should have_many(:snapshots) }
-
   Training.each_box_number do |i|
     it { should serialize("box_#{i}".to_sym) }
   end
@@ -50,9 +48,9 @@ RSpec.describe Training, :type => :model do
     end
   end
 
-  describe '#create_snapshot!' do
-    it 'should create new snaphot' do
-      expect{subject.create_snapshot!}.to change(subject.snapshots, :length).by(1)
+  describe '#enshure_snapshot' do
+    it 'should create today snapshot' do
+      expect{subject.ensure_snapshot}.to change(subject.snapshots, :length).by(1)
     end
   end
 

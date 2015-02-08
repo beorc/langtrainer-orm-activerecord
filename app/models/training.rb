@@ -7,11 +7,13 @@ class Training < ActiveRecord::Base
   belongs_to :user
   belongs_to :unit
   belongs_to :current_step, class_name: 'Step'
-  has_many :snapshots, class_name: 'Training::Snapshot', dependent: :destroy
 
   scope :for_unit, -> (unit) { where(unit: unit) }
 
   before_create :ensure_boxes
+  before_save :ensure_snapshot
+
+  serialize :snapshots, Hash
 
   def self.each_box_number
     BOXES_NUMBER.times do |i|
@@ -118,18 +120,14 @@ class Training < ActiveRecord::Base
     current_step
   end
 
-  def create_snapshot!
-    snapshots.where('date >= ?', DateTime.current.beginning_of_day).destroy_all
-    snapshots.create! do |s|
-      s.date = DateTime.current
-      s.snapshot = {
-        steps_passed: steps_passed,
-        words_helped: words_helped,
-        steps_helped: steps_helped,
-        right_answers: right_answers,
-        wrong_answers: wrong_answers
-      }
-    end
+  def ensure_snapshot
+    snapshots[Date.today] = {
+      steps_passed: steps_passed,
+      words_helped: words_helped,
+      steps_helped: steps_helped,
+      right_answers: right_answers,
+      wrong_answers: wrong_answers
+    }
   end
 
   def ensure_boxes

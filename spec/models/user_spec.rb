@@ -11,7 +11,6 @@ RSpec.describe User, :type => :model do
   it { should validate_uniqueness_of :token }
 
   it { should have_many :trainings }
-  it { should have_many :snapshots }
 
   describe '.fetch_or_create_by!' do
     it 'should set up token' do

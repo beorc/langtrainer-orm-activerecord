@@ -1,6 +1,5 @@
 class User < ActiveRecord::Base
   has_many :trainings, dependent: :destroy
-  has_many :snapshots, class_name: 'Training::Snapshot', through: :trainings
 
   validates :token, presence: true, uniqueness: true
 
