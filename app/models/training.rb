@@ -27,6 +27,8 @@ class Training < ActiveRecord::Base
     serialize "box_#{i}".to_sym, Array
   end
 
+  attr_accessor :difficulty_index
+
   def right_answer?(answer)
     current_step.right_answer?(language.slug, answer)
   end
