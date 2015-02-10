@@ -31,6 +31,15 @@ class Training < ActiveRecord::Base
     current_step.right_answer?(language.slug, answer)
   end
 
+  def reschedule!
+    each_box_number do |i|
+      next if i == 0
+      self.box_0 += step_ids_from_box(i)
+      step_ids_from_box(i).clear
+    end
+    save!
+  end
+
   def push_current_step_to_first_box!
     each_box_number do |i|
       step_number = step_ids_from_box(i).delete(current_step_id)
@@ -115,6 +124,9 @@ class Training < ActiveRecord::Base
         if step_ids.any?
           max_step_number = step_ids.count - 1
           self.current_step_id = step_ids[rand(0..max_step_number)]
+          if i == BOXES_NUMBER - 1
+            reschedule!
+          end
           break
         end
       end
