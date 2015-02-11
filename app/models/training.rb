@@ -23,6 +23,12 @@ class Training < ActiveRecord::Base
     end
   end
 
+  def reverse_each_box_number
+    BOXES_NUMBER.times do |i|
+      yield(BOXES_NUMBER - i - 1)
+    end
+  end
+
   delegate :each_box_number, to: :class
 
   each_box_number do |i|
@@ -102,38 +108,32 @@ class Training < ActiveRecord::Base
   end
 
   def fetch_step!
+    step_id = nil
+
     rand = rand(0..100)
 
-    threshold = 0
-    each_box_number do |i|
+    reverse_each_box_number do |i|
       box_probability = BOXES_PROBABILITIES[i]
       step_ids = step_ids_from_box(i)
-      threshold += box_probability
       if step_ids.any?
-        if rand <= threshold
+        if rand <= box_probability
           max_step_number = step_ids.count - 1
           if unit.random_steps_order?
-            step_id = current_step_id
-            Timeout::timeout(1) do
-              while step_id == current_step_id
-                step_id = step_ids[rand(0..max_step_number)]
-              end
-            end
-            self.current_step_id = step_id
+            step_id = step_ids[rand(0..max_step_number)]
           else
-            self.current_step_id = step_ids.first
+            step_id = step_ids.first
           end
           break
         end
       end
     end
 
-    if current_step_id.nil?
+    if step_id.nil?
       each_box_number do |i|
         step_ids = step_ids_from_box(i)
         if step_ids.any?
           max_step_number = step_ids.count - 1
-          self.current_step_id = step_ids[rand(0..max_step_number)]
+          step_id = step_ids[rand(0..max_step_number)]
           if i == BOXES_NUMBER - 1
             reschedule!
           end
@@ -141,6 +141,8 @@ class Training < ActiveRecord::Base
         end
       end
     end
+
+    self.current_step_id = step_id
 
     save!
     current_step
