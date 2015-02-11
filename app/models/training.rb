@@ -1,3 +1,5 @@
+require 'timeout'
+
 class Training < ActiveRecord::Base
   BOXES_NUMBER = 5
   BOXES_PROBABILITIES = [60, 25, 10, 8, 2]
@@ -111,7 +113,13 @@ class Training < ActiveRecord::Base
         if rand <= threshold
           max_step_number = step_ids.count - 1
           if unit.random_steps_order?
-            self.current_step_id = step_ids[rand(0..max_step_number)]
+            step_id = current_step_id
+            Timeout::timeout(1) do
+              while step_id == current_step_id
+                step_id = step_ids[rand(0..max_step_number)]
+              end
+            end
+            self.current_step_id = step_id
           else
             self.current_step_id = step_ids.first
           end
