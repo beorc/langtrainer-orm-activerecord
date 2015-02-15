@@ -31,5 +31,6 @@ config/secrets.yml
 bower.json
 
 *.swp
+*.swo
 /spec/dummy/db/*.sqlite3
 /spec/dummy/log/*.log

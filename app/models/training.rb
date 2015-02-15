@@ -178,6 +178,24 @@ class Training < ActiveRecord::Base
     self.current_step_id = step_ids.first
   end
 
+  def schedule_new_steps!
+    existing_step_ids = []
+
+    each_box_number do |i|
+      existing_step_ids += step_ids_from_box(i)
+    end
+
+    steps_units = unit
+      .steps_units
+      .from_language(language)
+      .to_language(native_language)
+
+    steps_units = steps_units.ordered
+    step_ids = steps_units.pluck(:step_id)
+
+    self.box_0 += step_ids - existing_step_ids
+  end
+
   private
 
   def step_ids_from_box(number)
