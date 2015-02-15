@@ -3,6 +3,8 @@ require 'timeout'
 class Training < ActiveRecord::Base
   BOXES_NUMBER = 5
   BOXES_PROBABILITIES = [60, 25, 10, 8, 2]
+  DIFFICULTY_INDEX_THRESHOLD = 0.1
+
   validates :user, :unit, :current_step_id, :language_id, :native_language_id, presence: true
   validates :unit, uniqueness: { scope: [:user_id, :language_id, :native_language_id] }
 
@@ -12,10 +14,11 @@ class Training < ActiveRecord::Base
 
   scope :for_unit, -> (unit) { where(unit: unit) }
 
-  before_create :ensure_boxes
+  before_create :ensure_schedule
   before_save :ensure_snapshot
 
   serialize :snapshots, Hash
+  serialize :schedule, Hash
 
   def self.each_box_number
     BOXES_NUMBER.times do |i|
@@ -31,10 +34,6 @@ class Training < ActiveRecord::Base
 
   delegate :each_box_number, to: :class
 
-  each_box_number do |i|
-    serialize "box_#{i}".to_sym, Array
-  end
-
   attr_accessor :difficulty_index
 
   def right_answer?(answer)
@@ -42,37 +41,27 @@ class Training < ActiveRecord::Base
   end
 
   def reschedule!
-    each_box_number do |i|
-      next if i == 0
-      self.box_0 += step_ids_from_box(i)
-      step_ids_from_box(i).clear
+    schedule.keys.each do |step_id|
+      self.schedule[step_id][:box] = 0
     end
+
     save!
   end
 
   def push_current_step_to_first_box!
-    each_box_number do |i|
-      step_number = step_ids_from_box(i).delete(current_step_id)
-      if step_number
-        step_ids_from_box(0).push(step_number)
-        save!
-        break
-      end
-    end
+    schedule[current_step_id] ||= {}
+    schedule[current_step_id][:box] = 0
+    save!
   end
 
   def push_current_step_to_next_box!
-    each_box_number do |i|
-      next_box_number = i + 1
-      if next_box_number < BOXES_NUMBER
-        step_number = step_ids_from_box(i).delete(current_step_id)
-        if step_number
-          step_ids_from_box(next_box_number).push(step_number)
-          save!
-          break
-        end
-      end
+    next_box_number = schedule[current_step_id][:box] + 1
+
+    if next_box_number < BOXES_NUMBER
+      self.schedule[current_step_id][:box] = next_box_number
     end
+
+    save!
   end
 
   def language
@@ -96,10 +85,15 @@ class Training < ActiveRecord::Base
   end
 
   def right_answer!
+    if difficulty_index.to_f < DIFFICULTY_INDEX_THRESHOLD
+      push_current_step_to_next_box!
+    end
+
     increment!(:right_answers)
   end
 
   def wrong_answer!
+    push_current_step_to_first_box!
     increment!(:wrong_answers)
   end
 
@@ -114,15 +108,17 @@ class Training < ActiveRecord::Base
 
     reverse_each_box_number do |i|
       box_probability = BOXES_PROBABILITIES[i]
-      step_ids = step_ids_from_box(i)
-      if step_ids.any?
-        if rand <= box_probability
+      if rand <= box_probability
+        step_ids = step_ids_from_box(i)
+        if step_ids.any?
           max_step_number = step_ids.count - 1
+
           if unit.random_steps_order?
             step_id = step_ids[rand(0..max_step_number)]
           else
             step_id = step_ids.first
           end
+
           break
         end
       end
@@ -158,8 +154,8 @@ class Training < ActiveRecord::Base
     }
   end
 
-  def ensure_boxes
-    return if box_0.present?
+  def ensure_schedule
+    return if schedule.present?
 
     reserved_step = unit.steps.first
 
@@ -174,16 +170,14 @@ class Training < ActiveRecord::Base
     step_ids.delete reserved_step.id
     step_ids.unshift reserved_step.id
 
-    self.box_0 = step_ids
+    step_ids.each do |step_id|
+      self.schedule[step_id] = { box: 0 }
+    end
     self.current_step_id = step_ids.first
   end
 
   def schedule_new_steps!
-    existing_step_ids = []
-
-    each_box_number do |i|
-      existing_step_ids += step_ids_from_box(i)
-    end
+    existing_step_ids = schedule.keys
 
     steps_units = unit
       .steps_units
@@ -191,21 +185,18 @@ class Training < ActiveRecord::Base
       .to_language(native_language)
 
     steps_units = steps_units.ordered
-    step_ids = steps_units.pluck(:step_id)
+    step_ids = steps_units.where.not(step_id: existing_step_ids).pluck(:step_id)
 
-    self.box_0 += step_ids - existing_step_ids
+    step_ids.each do |step_id|
+      self.schedule[step_id] = { box: 0 }
+    end
+
     self.save!
   end
 
   private
 
   def step_ids_from_box(number)
-    attr_name = "box_#{number}"
-
-    if respond_to?(attr_name)
-      return send(attr_name)
-    else
-      return []
-    end
+    schedule.select { |k, v| v[:box] == number }.keys
   end
 end
