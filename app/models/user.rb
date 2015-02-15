@@ -24,6 +24,7 @@ class User < ActiveRecord::Base
   def current_step_for(unit)
     step = nil
     training = trainings.for_unit(unit).first
+
     if training
       step = training.current_step
     else

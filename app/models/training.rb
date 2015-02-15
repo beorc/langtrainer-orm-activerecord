@@ -59,9 +59,8 @@ class Training < ActiveRecord::Base
 
     if next_box_number < BOXES_NUMBER
       self.schedule[current_step_id][:box] = next_box_number
+      save!
     end
-
-    save!
   end
 
   def language
