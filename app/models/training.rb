@@ -194,6 +194,7 @@ class Training < ActiveRecord::Base
     step_ids = steps_units.pluck(:step_id)
 
     self.box_0 += step_ids - existing_step_ids
+    self.save!
   end
 
   private
