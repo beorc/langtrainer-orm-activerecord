@@ -30,6 +30,6 @@ class Step < ActiveRecord::Base
   end
 
   def to_s
-    title
+    "#{id}: #{title}"
   end
 end
