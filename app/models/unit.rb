@@ -8,5 +8,9 @@ class Unit < ActiveRecord::Base
   has_many :trainings, dependent: :destroy
 
   scope :published, -> { where(published: true) }
+
+  def to_s
+    "#{course.to_s}: #{slug}"
+  end
 end
 

@@ -40,5 +40,9 @@ class User < ActiveRecord::Base
       break token if User.uncached { where(token: token).empty? }
     end
   end
+
+  def to_s
+    token
+  end
 end
 

@@ -193,6 +193,10 @@ class Training < ActiveRecord::Base
     self.save!
   end
 
+  def to_s
+    "#{user.to_s}: #{unit.to_s}"
+  end
+
   private
 
   def step_ids_from_box(number)

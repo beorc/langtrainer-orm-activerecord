@@ -28,4 +28,8 @@ class Step < ActiveRecord::Base
     answers = send("#{language_slug}_answers").to_s
     answers.split('|').map(&:strip)
   end
+
+  def to_s
+    title
+  end
 end

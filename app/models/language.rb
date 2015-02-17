@@ -73,6 +73,10 @@ class Language
     id
   end
 
+  def to_s
+    title
+  end
+
   def to_class_name
     'Language'
   end

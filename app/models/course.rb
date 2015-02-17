@@ -6,4 +6,8 @@ class Course < ActiveRecord::Base
   has_many :steps, through: :steps_units
 
   scope :published, -> { where(published: true) }
+
+  def to_s
+    slug
+  end
 end

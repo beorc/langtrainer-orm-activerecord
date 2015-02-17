@@ -19,5 +19,9 @@ class StepsUnit < ActiveRecord::Base
   def self.shuffled
     scoped.sample(count)
   end
+
+  def to_s
+    "#{unit.to_s}: #{step.title}"
+  end
 end
 
