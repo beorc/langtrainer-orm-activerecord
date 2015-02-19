@@ -40,11 +40,14 @@ class Training < ActiveRecord::Base
     current_step.right_answer?(language.slug, answer)
   end
 
-  def reschedule!
+  def reschedule
     schedule.keys.each do |step_id|
       self.schedule[step_id][:box] = 0
     end
+  end
 
+  def reschedule!
+    reschedule
     save!
   end
 
@@ -110,6 +113,7 @@ class Training < ActiveRecord::Base
       if rand <= box_probability
         step_ids = step_ids_from_box(i)
         if step_ids.any?
+          step_ids.delete current_step_id
           max_step_number = step_ids.count - 1
 
           if unit.random_steps_order?
@@ -127,11 +131,14 @@ class Training < ActiveRecord::Base
       each_box_number do |i|
         step_ids = step_ids_from_box(i)
         if step_ids.any?
+          step_ids.delete current_step_id
           max_step_number = step_ids.count - 1
           step_id = step_ids[rand(0..max_step_number)]
+
           if i == BOXES_NUMBER - 1
-            reschedule!
+            reschedule
           end
+
           break
         end
       end
