@@ -111,9 +111,11 @@ class Training < ActiveRecord::Base
     reverse_each_box_number do |i|
       box_probability = BOXES_PROBABILITIES[i]
       if rand <= box_probability
+
         step_ids = step_ids_from_box(i)
+        step_ids.delete current_step_id
+
         if step_ids.any?
-          step_ids.delete current_step_id
           max_step_number = step_ids.count - 1
 
           if unit.random_steps_order?
@@ -129,9 +131,11 @@ class Training < ActiveRecord::Base
 
     if step_id.nil?
       each_box_number do |i|
+
         step_ids = step_ids_from_box(i)
+        step_ids.delete current_step_id
+
         if step_ids.any?
-          step_ids.delete current_step_id
           max_step_number = step_ids.count - 1
           step_id = step_ids[rand(0..max_step_number)]
 
