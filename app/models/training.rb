@@ -109,12 +109,14 @@ class Training < ActiveRecord::Base
     if unit.random_steps_order?
       step_id = fetch_random_step
     else
-      step_id = fetch_nonrandom_step
+      if step_ids_from_box(0).count > 1
+        step_id = fetch_nonrandom_step
+      else
+        step_id = fetch_random_step
+      end
     end
 
-    if step_id.nil?
-      step_id = fetch_fallback_step
-    end
+    step_id ||= fetch_fallback_step
 
     self.current_step_id = step_id
 
@@ -205,6 +207,8 @@ class Training < ActiveRecord::Base
     i = step_ids.index current_step_id
     step_ids.delete current_step_id
     step_id = step_ids[i]
+
+    step_id ||= step_ids_from_box(0).first
 
     step_id
   end
