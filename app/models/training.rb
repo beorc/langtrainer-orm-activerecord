@@ -106,46 +106,14 @@ class Training < ActiveRecord::Base
   def fetch_step!
     step_id = nil
 
-    rand = rand(0..100)
-
-    reverse_each_box_number do |i|
-      box_probability = BOXES_PROBABILITIES[i]
-      if rand <= box_probability
-
-        step_ids = step_ids_from_box(i)
-        step_ids.delete current_step_id
-
-        if step_ids.any?
-          max_step_number = step_ids.count - 1
-
-          if unit.random_steps_order?
-            step_id = step_ids[rand(0..max_step_number)]
-          else
-            step_id = step_ids.first
-          end
-
-          break
-        end
-      end
+    if unit.random_steps_order?
+      step_id = fetch_random_step
+    else
+      step_id = fetch_nonrandom_step
     end
 
     if step_id.nil?
-      each_box_number do |i|
-
-        step_ids = step_ids_from_box(i)
-        step_ids.delete current_step_id
-
-        if step_ids.any?
-          max_step_number = step_ids.count - 1
-          step_id = step_ids[rand(0..max_step_number)]
-
-          if i == BOXES_NUMBER - 1
-            reschedule
-          end
-
-          break
-        end
-      end
+      step_id = fetch_fallback_step
     end
 
     self.current_step_id = step_id
@@ -209,6 +177,60 @@ class Training < ActiveRecord::Base
   end
 
   private
+
+  def fetch_random_step
+    step_id = nil
+    rand = rand(0..100)
+
+    reverse_each_box_number do |i|
+      box_probability = BOXES_PROBABILITIES[i]
+      if rand <= box_probability
+
+        step_ids = step_ids_from_box(i)
+        step_ids.delete current_step_id
+
+        if step_ids.any?
+          max_step_number = step_ids.count - 1
+          step_id = step_ids[rand(0..max_step_number)]
+          break
+        end
+      end
+    end
+
+    step_id
+  end
+
+  def fetch_nonrandom_step
+    step_ids = schedule.keys
+    i = step_ids.index current_step_id
+    step_ids.delete current_step_id
+    step_id = step_ids[i]
+
+    step_id
+  end
+
+  def fetch_fallback_step
+    step_id = nil
+
+    each_box_number do |i|
+
+      step_ids = step_ids_from_box(i)
+      step_ids.delete current_step_id
+
+      if step_ids.any?
+        max_step_number = step_ids.count - 1
+        step_id = step_ids[rand(0..max_step_number)]
+
+        if i == BOXES_NUMBER - 1
+          reschedule
+        end
+
+        break
+      end
+    end
+
+    step_id
+  end
 
   def step_ids_from_box(number)
     schedule.select { |k, v| v[:box] == number }.keys
