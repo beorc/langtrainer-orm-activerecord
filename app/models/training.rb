@@ -53,7 +53,7 @@ class Training < ActiveRecord::Base
 
   def push_current_step_to_first_box!
     schedule[current_step_id] ||= {}
-    schedule[current_step_id][:box] = 0
+    schedule[current_step_id][:box] = unit.random_steps_order? ? 0 : 1
     save!
   end
 
@@ -109,7 +109,10 @@ class Training < ActiveRecord::Base
     if unit.random_steps_order?
       step_id = fetch_random_step
     else
-      if step_ids_from_box(0).count > 1
+      step_ids = step_ids_from_box(0)
+      step_ids.delete current_step_id
+
+      if step_ids.any?
         step_id = fetch_nonrandom_step
       else
         step_id = fetch_random_step
