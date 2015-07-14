@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
   s.version     = LangtrainerOrmActiverecord::VERSION
   s.authors     = ["Yury Kotov"]
   s.email       = ["bairkan@gmail.com"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of LangtrainerOrmActiverecord."
-  s.description = "TODO: Description of LangtrainerOrmActiverecord."
+  s.homepage    = "https:/github.com/langtrainer/langtrainer_orm_activerecord"
+  s.summary     = "Data layer for langtrainer API"
+  s.description = "Data layer shared between langtrainer API and backoffice"
   s.license     = "MIT"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
